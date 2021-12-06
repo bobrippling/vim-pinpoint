@@ -8,29 +8,29 @@ if !exists('g:pinpoint_preview_fullwords')
 	let g:pinpoint_preview_fullwords = 0
 endif
 
-command! -complete=customlist,pinpoint#oldfiles#CompleteOldFilesMatch -nargs=1 Oldedit   call pinpoint#oldfiles#OldEdit(<q-args>, "edit", <q-mods>)
-command! -complete=customlist,pinpoint#oldfiles#CompleteOldFilesMatch -nargs=1 Oldsplit  call pinpoint#oldfiles#OldEdit(<q-args>, "split", <q-mods>)
-command! -complete=customlist,pinpoint#oldfiles#CompleteOldFilesMatch -nargs=1 Oldvsplit call pinpoint#oldfiles#OldEdit(<q-args>, "vsplit", <q-mods>)
+let g:pinpoint_cmds = '(Buf|F|Old)%(%[edit]|%[vsplit]|%[split]|%[tabedit])'
+"                       ^~~~~~~~~ capture used
 
-let g:pinpoint_cmds = '(Buf|F)%(%[edit]|%[vsplit]|%[split]|%[tabedit])'
-"                ^~~~~~~ capture used
+command! -nargs=1 -complete=customlist,pinpoint#oldfiles#CompleteOldFilesMatch Oldedit    call pinpoint#Edit(<q-args>, "edit", <q-bang>, <q-mods>, "o")
+command! -nargs=1 -complete=customlist,pinpoint#oldfiles#CompleteOldFilesMatch Oldsplit   call pinpoint#Edit(<q-args>, "split", <q-bang>, <q-mods>, "o")
+command! -nargs=1 -complete=customlist,pinpoint#oldfiles#CompleteOldFilesMatch Oldvsplit  call pinpoint#Edit(<q-args>, "vsplit", <q-bang>, <q-mods>, "o")
+command! -nargs=1 -complete=customlist,pinpoint#oldfiles#CompleteOldFilesMatch Oldtabedit call pinpoint#Edit(<q-args>, "tabedit", <q-bang>, <q-mods>, "o")
 
-command! -bang -bar -complete=customlist,pinpoint#CompleteBufs -nargs=1 Bufedit    call pinpoint#BufEdit(<q-args>, "buffer", <q-bang>, <q-mods>, "b")
-command! -bang -bar -complete=customlist,pinpoint#CompleteBufs -nargs=1 Bufsplit   call pinpoint#BufEdit(<q-args>, "sbuffer", <q-bang>, <q-mods>, "b")
-command! -bang -bar -complete=customlist,pinpoint#CompleteBufs -nargs=1 Bufvsplit  call pinpoint#BufEdit(<q-args>, "vert sbuffer", <q-bang>, <q-mods>, "b")
-command! -bang -bar -complete=customlist,pinpoint#CompleteBufs -nargs=1 Buftabedit call pinpoint#BufEdit(<q-args>, "tabedit | buffer", <q-bang>, <q-mods>, "b")
-" -range -addr=tabs
+command! -nargs=1 -bang -bar -complete=customlist,pinpoint#CompleteBufs Bufedit    call pinpoint#Edit(<q-args>, "buffer", <q-bang>, <q-mods>, "b")
+command! -nargs=1 -bang -bar -complete=customlist,pinpoint#CompleteBufs Bufsplit   call pinpoint#Edit(<q-args>, "sbuffer", <q-bang>, <q-mods>, "b")
+command! -nargs=1 -bang -bar -complete=customlist,pinpoint#CompleteBufs Bufvsplit  call pinpoint#Edit(<q-args>, "vert sbuffer", <q-bang>, <q-mods>, "b")
+command! -nargs=1 -bang -bar -complete=customlist,pinpoint#CompleteBufs Buftabedit call pinpoint#Edit(<q-args>, "tabedit | buffer", <q-bang>, <q-mods>, "b")
 
-command! -bang -bar -complete=customlist,pinpoint#CompleteFiles -nargs=1 Fedit    call pinpoint#BufEdit(<q-args>, "edit", <q-bang>, <q-mods>, "f")
-command! -bang -bar -complete=customlist,pinpoint#CompleteFiles -nargs=1 Fsplit   call pinpoint#BufEdit(<q-args>, "split", <q-bang>, <q-mods>, "f")
-command! -bang -bar -complete=customlist,pinpoint#CompleteFiles -nargs=1 Fvsplit  call pinpoint#BufEdit(<q-args>, "vsplit", <q-bang>, <q-mods>, "f")
-command! -bang -bar -complete=customlist,pinpoint#CompleteFiles -nargs=1 Ftabedit call pinpoint#BufEdit(<q-args>, "tabedit", <q-bang>, <q-mods>, "f")
+command! -nargs=1 -bang -bar -complete=customlist,pinpoint#CompleteFiles Fedit    call pinpoint#Edit(<q-args>, "edit", <q-bang>, <q-mods>, "f")
+command! -nargs=1 -bang -bar -complete=customlist,pinpoint#CompleteFiles Fsplit   call pinpoint#Edit(<q-args>, "split", <q-bang>, <q-mods>, "f")
+command! -nargs=1 -bang -bar -complete=customlist,pinpoint#CompleteFiles Fvsplit  call pinpoint#Edit(<q-args>, "vsplit", <q-bang>, <q-mods>, "f")
+command! -nargs=1 -bang -bar -complete=customlist,pinpoint#CompleteFiles Ftabedit call pinpoint#Edit(<q-args>, "tabedit", <q-bang>, <q-mods>, "f")
 
 augroup BufEdit
 	autocmd!
 
-	autocmd CmdlineChanged * call pinpoint#BufEditPreview()
-	autocmd CmdlineLeave * call pinpoint#BufEditPreviewClose()
+	autocmd CmdlineChanged * call pinpoint#EditPreview()
+	autocmd CmdlineLeave * call pinpoint#EditPreviewClose()
 augroup END
 
 highlight BufEditMatch ctermfg=blue

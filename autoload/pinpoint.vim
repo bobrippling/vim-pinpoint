@@ -186,7 +186,7 @@ function! pinpoint#CompleteFiles(ArgLead, CmdLine, CursorPos) abort
 endfunction
 
 " the command given to BufEdit must accept "!" appendin to it
-function! pinpoint#BufEdit(glob, editcmd, bangstr, mods, mode) abort
+function! pinpoint#Edit(glob, editcmd, bangstr, mods, mode) abort
 	let glob = a:glob
 
 	let ents = s:MatchingBufs(glob, [], a:mode)
@@ -205,14 +205,14 @@ function! pinpoint#BufEdit(glob, editcmd, bangstr, mods, mode) abort
 	execute a:mods a:editcmd a:bangstr path
 endfunction
 
-function! pinpoint#BufEditPreview() abort
+function! pinpoint#EditPreview() abort
 	if getcmdtype() != ":" || !empty(getcmdwintype())
 		return
 	endif
 
 	let matches = s:CmdlineMatchArg()
 	if empty(matches)
-		call pinpoint#BufEditPreviewClose()
+		call pinpoint#EditPreviewClose()
 	else
 		call s:BufEditPreviewQueue(matches)
 	endif
@@ -248,7 +248,7 @@ function! s:BufEditPreviewShow(arg_or_timerid) abort
 		let s:timer = -1
 		let cmd_and_arg = s:CmdlineMatchArg()
 		if empty(cmd_and_arg)
-			call pinpoint#BufEditPreviewClose()
+			call pinpoint#EditPreviewClose()
 			return
 		endif
 	endif
@@ -262,7 +262,7 @@ function! s:BufEditPreviewShow(arg_or_timerid) abort
 	endif
 	let mode = cmd[0] ==# "B" ? "b" : "f"
 	if empty(arg)
-		call pinpoint#BufEditPreviewClose()
+		call pinpoint#EditPreviewClose()
 		return
 	endif
 
@@ -356,7 +356,7 @@ function! s:preview_height() abort
 	return &cmdwinheight
 endfunction
 
-function! pinpoint#BufEditPreviewClose() abort
+function! pinpoint#EditPreviewClose() abort
 	if s:timer isnot -1
 		call timer_stop(s:timer)
 		let s:timer = -1
