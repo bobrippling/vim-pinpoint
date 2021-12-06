@@ -83,13 +83,36 @@ function! s:globpath_for_pattern(pat) abort
 	return globpath
 endfunction
 
+function! s:PinMode(cmdline)
+	" echom "pinmode" .. a:cmdline
+
+	" TODO ctrl-p behaviour:
+	"  key      prompt/shortcut from <C-P>  desc
+	" `<C-P>`                               file nav
+	" `<C-R>`                               recent nav
+	" `<C-S-P>`      >                      command palette, e.g. ???
+	" `<C-S-O>`      #, @-for-file          goto symbol
+	" `<C-G>`        :                      goto line
+	" `<C-S-M>`                             goto problems/quickfix
+	" `\``                                  toggle terminal
+	"
+	" TODO:
+	" handle skipping current file - just emit a hint in the preview
+	return "f"
+endfunction
+
 function! s:MatchingBufs(pat, list, mode) abort
 	let re = s:GetRe(a:pat)
 
+	let mode = a:mode
+	if mode ==# "p"
+		let mode = s:PinMode(a:pat)
+	endif
+
 	if empty(a:list)
-		if a:mode ==# "b"
+		if mode ==# "b"
 			let bufs = getbufinfo({ 'buflisted': 1 })
-		elseif a:mode ==# "f"
+		elseif mode ==# "f"
 			" expand() - handle ~, ~luser, %:h/...
 			let expanded_pat = expand(a:pat)
 			let bufs = glob(s:globpath_for_pattern(expanded_pat), 0, 1)
@@ -108,7 +131,7 @@ function! s:MatchingBufs(pat, list, mode) abort
 
 			call map(bufs, { i, name -> { "name": name } })
 			"call filter(bufs, { i, name -> s:is_ignored(name) })
-		elseif a:mode ==# "o"
+		elseif mode ==# "o"
 			let bufs = v:oldfiles[:]
 			call map(bufs, { i, name -> { "name": name } })
 		endif
@@ -116,7 +139,7 @@ function! s:MatchingBufs(pat, list, mode) abort
 		let bufs = a:list
 	endif
 
-	call filter(bufs, function('s:MatchAndTag', [re, a:mode]))
+	call filter(bufs, function('s:MatchAndTag', [re, mode]))
 	call sort(bufs, 's:Cmp')
 
 	return bufs
@@ -204,25 +227,37 @@ function! pinpoint#CompleteOldFiles(ArgLead, CmdLine, CursorPos) abort
 	return bufs
 endfunction
 
+function! pinpoint#CompletePin(ArgLead, CmdLine, CursorPos) abort
+	let mode = s:PinMode(a:ArgLead)
+	let bufs = s:MatchingBufs(a:ArgLead, [], mode)
+	call map(bufs, { i, ent -> ent.name })
+	return bufs
+endfunction
+
 " the command given to BufEdit must accept "!" appendin to it
 function! pinpoint#Edit(glob, editcmd, bangstr, mods, mode) abort
 	let glob = a:glob
 
-	let ents = s:MatchingBufs(glob, [], a:mode)
+	let mode = a:mode
+	if mode ==# "p"
+		let mode = s:PinMode(glob)
+	endif
+
+	let ents = s:MatchingBufs(glob, [], mode)
 	if len(ents) < 1
 		echoerr "No matches for" glob
 		return
 	endif
 
 	" just pick the first to match the preview
-	if a:mode ==# "b"
+	if mode ==# "b"
 		let path = ents[0].bufnr
-	elseif a:mode ==# "f"
+	elseif mode ==# "f"
 		let path = ents[0].name
-	elseif a:mode ==# "o"
+	elseif mode ==# "o"
 		let path = ents[0].name
 	else
-		echoerr "Invalid mode" a:mode
+		echoerr "Invalid mode" mode
 	endif
 
 	execute a:mods a:editcmd a:bangstr path
@@ -275,6 +310,16 @@ function! s:ModeStr(mode)
 	return "<unknown mode " .. a:mode .. ">"
 endfunction
 
+function! s:ModeFromCmd(cmd)
+	return a:cmd[0] ==# "B"
+	\  ? "b"
+	\  : a:cmd[0] ==# "O"
+	\  ? "o"
+	\  : a:cmd[0] ==# "F"
+	\  ? "f"
+	\  : "p"
+endfunction
+
 function! s:BufEditPreviewShow(arg_or_timerid) abort
 	let cmd_and_arg = a:arg_or_timerid
 	if type(cmd_and_arg) is v:t_number
@@ -295,8 +340,7 @@ function! s:BufEditPreviewShow(arg_or_timerid) abort
 		call pinpoint#EditPreviewClose()
 		return
 	endif
-
-	let mode = cmd[0] ==# "B" ? "b" : cmd[0] ==# "O" ? "o" : "f"
+	let mode = s:ModeFromCmd(cmd)
 
 	if !win_id2win(s:preview_winid)
 		call s:BufEditPreviewOpen()

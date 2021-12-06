@@ -8,8 +8,8 @@ if !exists('g:pinpoint_preview_fullwords')
 	let g:pinpoint_preview_fullwords = 0
 endif
 
-let g:pinpoint_cmds = '(Buf|F|Old)%(%[edit]|%[vsplit]|%[split]|%[tabedit])'
-"                       ^~~~~~~~~ capture used
+let g:pinpoint_cmds = '(Buf|F|Old|Pinpoint)%(%[edit]|%[vsplit]|%[split]|%[tabedit])'
+"                       ^~~~~~~~~~~~~~~~~~ capture used
 
 command! -nargs=1 -complete=customlist,pinpoint#CompleteOldFiles Oldedit    call pinpoint#Edit(<q-args>, "edit", <q-bang>, <q-mods>, "o")
 command! -nargs=1 -complete=customlist,pinpoint#CompleteOldFiles Oldsplit   call pinpoint#Edit(<q-args>, "split", <q-bang>, <q-mods>, "o")
@@ -26,7 +26,10 @@ command! -nargs=1 -bang -bar -complete=customlist,pinpoint#CompleteFiles Fsplit 
 command! -nargs=1 -bang -bar -complete=customlist,pinpoint#CompleteFiles Fvsplit  call pinpoint#Edit(<q-args>, "vsplit", <q-bang>, <q-mods>, "f")
 command! -nargs=1 -bang -bar -complete=customlist,pinpoint#CompleteFiles Ftabedit call pinpoint#Edit(<q-args>, "tabedit", <q-bang>, <q-mods>, "f")
 
-nnoremap <expr> <C-p> ":\<C-U>Bufedit "
+command! -nargs=1 -bang -bar -complete=customlist,pinpoint#CompletePin Pinpoint call pinpoint#Edit(<q-args>, "", <q-bang>, <q-mods>, "p")
+
+nnoremap <expr> <C-p> ':<C-U>Pinpoint '
+"nnoremap <expr> <C-p> ":\<C-U>Bufedit "
 nnoremap <expr> <M-p> ":\<C-U>Fe "
 
 augroup BufEdit
