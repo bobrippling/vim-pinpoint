@@ -11,10 +11,10 @@ endif
 let g:pinpoint_cmds = '(Buf|F|Old)%(%[edit]|%[vsplit]|%[split]|%[tabedit])'
 "                       ^~~~~~~~~ capture used
 
-command! -nargs=1 -complete=customlist,pinpoint#oldfiles#CompleteOldFilesMatch Oldedit    call pinpoint#Edit(<q-args>, "edit", <q-bang>, <q-mods>, "o")
-command! -nargs=1 -complete=customlist,pinpoint#oldfiles#CompleteOldFilesMatch Oldsplit   call pinpoint#Edit(<q-args>, "split", <q-bang>, <q-mods>, "o")
-command! -nargs=1 -complete=customlist,pinpoint#oldfiles#CompleteOldFilesMatch Oldvsplit  call pinpoint#Edit(<q-args>, "vsplit", <q-bang>, <q-mods>, "o")
-command! -nargs=1 -complete=customlist,pinpoint#oldfiles#CompleteOldFilesMatch Oldtabedit call pinpoint#Edit(<q-args>, "tabedit", <q-bang>, <q-mods>, "o")
+command! -nargs=1 -complete=customlist,pinpoint#CompleteOldFiles Oldedit    call pinpoint#Edit(<q-args>, "edit", <q-bang>, <q-mods>, "o")
+command! -nargs=1 -complete=customlist,pinpoint#CompleteOldFiles Oldsplit   call pinpoint#Edit(<q-args>, "split", <q-bang>, <q-mods>, "o")
+command! -nargs=1 -complete=customlist,pinpoint#CompleteOldFiles Oldvsplit  call pinpoint#Edit(<q-args>, "vsplit", <q-bang>, <q-mods>, "o")
+command! -nargs=1 -complete=customlist,pinpoint#CompleteOldFiles Oldtabedit call pinpoint#Edit(<q-args>, "tabedit", <q-bang>, <q-mods>, "o")
 
 command! -nargs=1 -bang -bar -complete=customlist,pinpoint#CompleteBufs Bufedit    call pinpoint#Edit(<q-args>, "buffer", <q-bang>, <q-mods>, "b")
 command! -nargs=1 -bang -bar -complete=customlist,pinpoint#CompleteBufs Bufsplit   call pinpoint#Edit(<q-args>, "sbuffer", <q-bang>, <q-mods>, "b")

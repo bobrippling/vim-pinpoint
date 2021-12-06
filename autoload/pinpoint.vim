@@ -46,6 +46,10 @@ function! s:slashcount(s) abort
 	return len(substitute(a:s, '[^/]', '', 'g'))
 endfunction
 
+function! s:slashcount_relevant(mode) abort
+	return stridx("fo", a:mode) >= 0
+endfunction
+
 function! s:globpath_for_pattern(pat) abort
 	let pat = a:pat
 
@@ -79,7 +83,7 @@ function! s:MatchingBufs(pat, list, mode) abort
 	if empty(a:list)
 		if a:mode ==# "b"
 			let bufs = getbufinfo({ 'buflisted': 1 })
-		else
+		elseif a:mode ==# "f"
 			" expand() - handle ~, ~luser, %:h/...
 			let expanded_pat = expand(a:pat)
 			let bufs = glob(s:globpath_for_pattern(expanded_pat), 0, 1)
@@ -98,6 +102,9 @@ function! s:MatchingBufs(pat, list, mode) abort
 
 			call map(bufs, { i, name -> { "name": name } })
 			"call filter(bufs, { i, name -> s:is_ignored(name) })
+		elseif a:mode ==# "o"
+			let bufs = v:oldfiles[:]
+			call map(bufs, { i, name -> { "name": name } })
 		endif
 	else
 		let bufs = a:list
@@ -185,6 +192,12 @@ function! pinpoint#CompleteFiles(ArgLead, CmdLine, CursorPos) abort
 	return bufs
 endfunction
 
+function! pinpoint#CompleteOldFiles(ArgLead, CmdLine, CursorPos) abort
+	let bufs = s:MatchingBufs(a:ArgLead, [], "o")
+	call map(bufs, { i, ent -> ent.name })
+	return bufs
+endfunction
+
 " the command given to BufEdit must accept "!" appendin to it
 function! pinpoint#Edit(glob, editcmd, bangstr, mods, mode) abort
 	let glob = a:glob
@@ -198,8 +211,12 @@ function! pinpoint#Edit(glob, editcmd, bangstr, mods, mode) abort
 	" just pick the first to match the preview
 	if a:mode ==# "b"
 		let path = ents[0].bufnr
-	else
+	elseif a:mode ==# "f"
 		let path = ents[0].name
+	elseif a:mode ==# "o"
+		let path = ents[0].name
+	else
+		echoerr "Invalid mode" a:mode
 	endif
 
 	execute a:mods a:editcmd a:bangstr path
@@ -260,7 +277,7 @@ function! s:BufEditPreviewShow(arg_or_timerid) abort
 	if empty(arg)
 		return
 	endif
-	let mode = cmd[0] ==# "B" ? "b" : "f"
+	let mode = cmd[0] ==# "B" ? "b" : cmd[0] ==# "O" ? "o" : "f"
 	if empty(arg)
 		call pinpoint#EditPreviewClose()
 		return
@@ -275,7 +292,7 @@ function! s:BufEditPreviewShow(arg_or_timerid) abort
 	" of starting from getbufinfo() each time
 	if len(arg) < len(s:current_ent)
 	\ || arg[:len(s:current_ent) - 1] !=# s:current_ent
-	\ || (mode ==# "f" && (
+	\ || (s:slashcount_relevant(mode) && (
 	\     s:current_ent_slashcount isnot s:slashcount(arg)
 	\     || g:pinpoint_preview_fullwords
 	\ ))
