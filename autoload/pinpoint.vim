@@ -1,4 +1,4 @@
-let s:preview_winid = 0
+let s:preview_winid = -1
 let s:saved_laststatus = &laststatus
 let s:restore_win_layout = ''
 let s:current_list = []
@@ -382,13 +382,13 @@ function! pinpoint#EditPreviewClose() abort
 	let s:current_list = []
 	let s:current_ent_slashcount = -1
 
-	if !s:preview_winid
+	if s:preview_winid is -1
 		return
 	endif
 	" could win_gotoid() + q or win_execute(..., "q")
 	" but the user can't really switch tabs while this is going on
 	let win = win_id2win(s:preview_winid)
-	let s:preview_winid = 0
+	let s:preview_winid = -1
 	if !win
 		return
 	endif
