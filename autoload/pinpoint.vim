@@ -4,6 +4,7 @@ let s:restore_win_layout = ''
 let s:current_list = []
 let s:current_ent = ""
 let s:current_ent_slashcount = 0
+let s:current_mode = 'f'
 let s:timer = -1
 let s:showre = 0
 
@@ -83,10 +84,20 @@ function! s:globpath_for_pattern(pat) abort
 	return globpath
 endfunction
 
-function! s:PinMode(cmdline)
-	" echom "pinmode" .. a:cmdline
+function! pinpoint#ShowWithMode(mode)
+	let s:current_mode = a:mode
 
-	" TODO ctrl-p behaviour:
+	return ":\<C-U>Pinpoint "
+endfunction
+
+function! s:resolve_mode(mode, cmdline)
+	if a:mode ==# "p"
+		return [s:current_mode, a:cmdline]
+	else
+		return [a:mode, a:cmdline]
+	endif
+
+	" vscode ctrl-p behaviour:
 	"  key      prompt/shortcut from <C-P>  desc
 	" `<C-P>`                               file nav
 	" `<C-R>`                               recent nav
@@ -95,32 +106,26 @@ function! s:PinMode(cmdline)
 	" `<C-G>`        :                      goto line
 	" `<C-S-M>`                             goto problems/quickfix
 	" `\``                                  toggle terminal
-	"
-	" TODO:
-	" handle skipping current file - just emit a hint in the preview
-	return "f"
 endfunction
 
 function! s:MatchingBufs(pat, list, mode) abort
-	let re = s:GetRe(a:pat)
+	let pat = a:pat
+	let [mode, pat] = s:resolve_mode(a:mode, pat)
 
-	let mode = a:mode
-	if mode ==# "p"
-		let mode = s:PinMode(a:pat)
-	endif
+	let re = s:GetRe(pat)
 
 	if empty(a:list)
 		if mode ==# "b"
 			let bufs = getbufinfo({ 'buflisted': 1 })
 		elseif mode ==# "f"
 			" expand() - handle ~, ~luser, %:h/...
-			let expanded_pat = expand(a:pat)
+			let expanded_pat = expand(pat)
 			let bufs = glob(s:globpath_for_pattern(expanded_pat), 0, 1)
 
 			let make_uniq = 0
-			if expanded_pat !=# a:pat
+			if expanded_pat !=# pat
 				" include buffers stored without '~' expansion
-				call extend(bufs, glob(s:globpath_for_pattern(a:pat), 0, 1))
+				call extend(bufs, glob(s:globpath_for_pattern(pat), 0, 1))
 				let make_uniq = 1
 			endif
 
@@ -228,20 +233,15 @@ function! pinpoint#CompleteOldFiles(ArgLead, CmdLine, CursorPos) abort
 endfunction
 
 function! pinpoint#CompletePin(ArgLead, CmdLine, CursorPos) abort
-	let mode = s:PinMode(a:ArgLead)
-	let bufs = s:MatchingBufs(a:ArgLead, [], mode)
+	let [mode, arglead] = s:resolve_mode('p', a:ArgLead)
+	let bufs = s:MatchingBufs(arglead, [], mode)
 	call map(bufs, { i, ent -> ent.name })
 	return bufs
 endfunction
 
 " the command given to BufEdit must accept "!" appendin to it
 function! pinpoint#Edit(glob, editcmd, bangstr, mods, mode) abort
-	let glob = a:glob
-
-	let mode = a:mode
-	if mode ==# "p"
-		let mode = s:PinMode(glob)
-	endif
+	let [mode, glob] = s:resolve_mode(a:mode, a:glob)
 
 	let ents = s:MatchingBufs(glob, [], mode)
 	if len(ents) < 1
@@ -341,6 +341,7 @@ function! s:BufEditPreviewShow(arg_or_timerid) abort
 		return
 	endif
 	let mode = s:ModeFromCmd(cmd)
+	let [mode, cmd] = s:resolve_mode(mode, cmd)
 
 	if !win_id2win(s:preview_winid)
 		call s:BufEditPreviewOpen()
