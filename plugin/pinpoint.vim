@@ -26,6 +26,9 @@ command! -nargs=1 -bang -bar -complete=customlist,pinpoint#CompleteFiles Fsplit 
 command! -nargs=1 -bang -bar -complete=customlist,pinpoint#CompleteFiles Fvsplit  call pinpoint#Edit(<q-args>, "vsplit", <q-bang>, <q-mods>, "f")
 command! -nargs=1 -bang -bar -complete=customlist,pinpoint#CompleteFiles Ftabedit call pinpoint#Edit(<q-args>, "tabedit", <q-bang>, <q-mods>, "f")
 
+nnoremap <expr> <C-p> ":\<C-U>Bufedit "
+nnoremap <expr> <M-p> ":\<C-U>Fe "
+
 augroup BufEdit
 	autocmd!
 
