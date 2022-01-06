@@ -281,13 +281,11 @@ function! s:BufEditPreviewShow(arg_or_timerid) abort
 	endif
 	let [cmd, arg] = cmd_and_arg
 	if empty(arg)
-		return
-	endif
-	let mode = cmd[0] ==# "B" ? "b" : cmd[0] ==# "O" ? "o" : "f"
-	if empty(arg)
 		call pinpoint#EditPreviewClose()
 		return
 	endif
+
+	let mode = cmd[0] ==# "B" ? "b" : cmd[0] ==# "O" ? "o" : "f"
 
 	if !win_id2win(s:preview_winid)
 		call s:BufEditPreviewOpen()
