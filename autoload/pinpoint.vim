@@ -264,6 +264,17 @@ function! s:BufEditPreviewQueue(cmd_and_arg) abort
 	endif
 endfunction
 
+function! s:ModeStr(mode)
+	if a:mode ==# "b"
+		return "buffer"
+	elseif a:mode ==# "f"
+		return "file"
+	elseif a:mode ==# "o"
+		return "oldfile"
+	endif
+	return "<unknown mode " .. a:mode .. ">"
+endfunction
+
 function! s:BufEditPreviewShow(arg_or_timerid) abort
 	let cmd_and_arg = a:arg_or_timerid
 	if type(cmd_and_arg) is v:t_number
@@ -310,7 +321,7 @@ function! s:BufEditPreviewShow(arg_or_timerid) abort
 	let s:current_list = matches
 
 	let buf = winbufnr(s:preview_winid)
-	call setbufline(buf, 1, "preview for '" . arg . "'" . (s:showre ? " /" . s:GetRe(arg) . "/" : ""))
+	call setbufline(buf, 1, s:ModeStr(mode) . " preview for '" . arg . "'" . (s:showre ? " /" . s:GetRe(arg) . "/" : ""))
 
 	let saved_win_id = win_getid()
 	" goto the preview window for matchaddpos()
