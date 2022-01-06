@@ -10,6 +10,11 @@ let s:showre = 0
 function! s:GetRe(pat) abort
 	let pat = a:pat
 
+	if pat[0] ==# '~'
+		" match s:MatchingBufs and always expand ~
+		let pat = expand(pat)
+	endif
+
 	"let pat = substitute(pat, '.', '*&', 'g')
 	"let pat = glob2regpat("*" . pat . "*")
 
@@ -17,7 +22,8 @@ function! s:GetRe(pat) abort
 	"let pat = substitute(pat, '[^\].', '&.\\{-}', 'g')
 
 	" escape: . * [ ] \ & ~
-	let parts = split(pat, '\ze[][.*\\~]')
+	let to_escape = '\ze[][.*&\\~]'
+	let parts = split(pat, to_escape)
 	let result = []
 	for i in range(len(parts))
 		let part = parts[i]
