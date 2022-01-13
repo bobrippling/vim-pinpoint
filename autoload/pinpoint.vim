@@ -373,13 +373,14 @@ endfunction
 
 function! s:BufEditPreviewOpen() abort
 	" affect the 7new below - we don't want an empty NonText line
-	let s:saved_laststatus = &laststatus
 	let s:restore_win_layout = winrestcmd()
-	set laststatus=0
-	set modifiable noreadonly
+
 	execute 'botright' s:preview_height() 'new'
 	let s:preview_winid = win_getid()
-	set winfixheight buftype=nofile bufhidden=wipe
+	setlocal modifiable noreadonly winfixheight buftype=nofile bufhidden=wipe
+
+	let s:saved_laststatus = &laststatus
+	set laststatus=0
 
 	wincmd p
 endfunction
