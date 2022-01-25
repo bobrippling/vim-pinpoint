@@ -413,4 +413,5 @@ function! pinpoint#EditPreviewClose() abort
 	let &laststatus = s:saved_laststatus
 	execute s:restore_win_layout
 	redraw
+	nohlsearch
 endfunction
