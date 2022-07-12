@@ -12,7 +12,11 @@ function! s:GetRe(pat) abort
 
 	if pat[0] ==# '~'
 		" match s:MatchingBufs and always expand ~
+		let make_lower = s:ignore_case() && !s:ismixedcase(pat)
 		let pat = expand(pat)
+		if make_lower
+			let pat = tolower(pat)
+		endif
 	endif
 
 	"let pat = substitute(pat, '.', '*&', 'g')
@@ -36,12 +40,16 @@ function! s:GetRe(pat) abort
 	endfor
 
 	let re = join(result, '')
-	if &ignorecase && (!&smartcase || !s:ismixedcase(re))
+	if s:ignore_case() && !s:ismixedcase(re)
 		let re = '\c' . re
 	else
 		let re = '\C' . re
 	endif
 	return re
+endfunction
+
+function! s:ignore_case()
+	return &wildignorecase
 endfunction
 
 function! s:ismixedcase(str) abort
@@ -95,7 +103,7 @@ function! s:MatchingBufs(pat, list, mode) abort
 			let bufs = glob(s:globpath_for_pattern(expanded_pat), 0, 1)
 
 			let make_uniq = 0
-			if expanded_pat !=# a:pat
+			if s:ignore_case() ? expanded_pat !=? a:pat : expanded_pat !=# a:pat
 				" include buffers stored without '~' expansion
 				call extend(bufs, glob(s:globpath_for_pattern(a:pat), 0, 1))
 				let make_uniq = 1
