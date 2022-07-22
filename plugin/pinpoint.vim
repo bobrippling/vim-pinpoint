@@ -8,7 +8,7 @@ if !exists('g:pinpoint_preview_fullwords')
 	let g:pinpoint_preview_fullwords = 0
 endif
 
-let g:pinpoint_cmds = '\C(Buf|F|Old)%(%[edit]|%[vsplit]|%[split]|%[tabedit])'
+let g:pinpoint_cmds = '\C(Buf|F|Old)%(e%[dit]|v%[split]|s%[plit]|t%[abedit])'
 "                       ^~~~~~~~~ capture used
 
 command! -nargs=1 -complete=customlist,pinpoint#CompleteOldFiles Oldedit    call pinpoint#Edit(<q-args>, "edit", <q-bang>, <q-mods>, "o")
