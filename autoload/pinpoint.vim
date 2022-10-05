@@ -423,3 +423,26 @@ function! pinpoint#EditPreviewClose() abort
 	redraw
 	nohlsearch
 endfunction
+
+function! pinpoint#UpgradeEditCmdline()
+	" note: any text after cmdline[getcmdpos()] gets dropped
+	let cmd = getcmdline()
+	let pos = getcmdpos() - 1 " 1-index -> 0-index
+	let cmd = cmd[:pos + 1]
+
+	let match = matchlist(cmd, '\v(^|.*\|)(\s*:*\s*)(e%[dit]|vs%[plit]|sp%[lit]|tabe%[dit])(\s.*)')
+	if len(match) == 0
+		echo "couldn't match"
+		return ''
+	endif
+
+	let edit_cmd = match[3]
+	let replace = 'F' . edit_cmd[0]
+
+	let newcmd = match[1] . match[2] . replace . match[4]
+
+	" called from cnorenamp:
+	"return "\<C-U>\<C-R>\<C-R>='" . newcmd . "'\<CR>"
+	"                   ^~~~~~ second <C-R> avoids autocmd for each inserted char
+	return "\<C-\>e '" . newcmd . "'\<CR>"
+endfunction

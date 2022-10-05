@@ -41,6 +41,8 @@ endif
 nnoremap <expr> <C-p> ":\<C-U>Bufedit "
 nnoremap <expr> <M-p> ":\<C-U>Fe "
 
+cnoremap <expr> <C-B> pinpoint#UpgradeEditCmdline()
+
 augroup BufEdit
 	autocmd!
 
