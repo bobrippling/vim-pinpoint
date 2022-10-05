@@ -430,14 +430,23 @@ function! pinpoint#UpgradeEditCmdline()
 	let pos = getcmdpos() - 1 " 1-index -> 0-index
 	let cmd = cmd[:pos + 1]
 
-	let match = matchlist(cmd, '\v(^|.*\|)(\s*:*\s*)(e%[dit]|vs%[plit]|sp%[lit]|tabe%[dit])(\s.*)')
+	let match = matchlist(cmd, '\v(^|.*\|)(\s*:*\s*)(e%[dit]|vs%[plit]|sp%[lit]|tabe%[dit]|b%[uffer]|sb%[uffer])(\s.*)')
 	if len(match) == 0
 		echo "couldn't match"
 		return ''
 	endif
 
 	let edit_cmd = match[3]
-	let replace = 'F' . edit_cmd[0]
+	if edit_cmd[0] ==# 'b'
+		" :b
+		let replace = 'Bufe'
+	elseif edit_cmd[0:1] ==# 'sb'
+		" :sb
+		let replace = 'Bufs'
+	else
+		" :e/vs/sp/tabe
+		let replace = 'F' . edit_cmd[0]
+	endif
 
 	let newcmd = match[1] . match[2] . replace . match[4]
 
