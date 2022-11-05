@@ -128,9 +128,14 @@ function! s:MatchingBufs(pat, list, mode) abort
 		let bufs = a:list
 	endif
 
-	let re = s:GetRe(a:pat)
-	call filter(bufs, function('s:MatchAndTag', [re, a:mode]))
-	call sort(bufs, 's:Cmp')
+	if exists("*matchfuzzy")
+		let pat = s:expand_tilde(a:pat)
+		let bufs = matchfuzzy(bufs, pat, { 'matchseq': 1, 'key': 'name' })
+	else
+		let re = s:GetRe(a:pat)
+		call filter(bufs, function('s:MatchAndTag', [re, a:mode]))
+		call sort(bufs, 's:Cmp')
+	endif
 
 	return bufs
 endfunction
@@ -354,17 +359,23 @@ function! s:BufEditPreviewShow(arg_or_timerid) abort
 			let line = m.name . (isdirectory(m.name) ? '/' : '')
 
 			if !g:pinpoint_preview_colour
-				let details =
-							\ repeat(" ", m.matchstart) .
-							\ "^" .
-							\ repeat("~", m.matchlen - 1)
+				if has_key(m, 'matchstart') " might be using matchfuzzy()
+					let details =
+								\ repeat(" ", m.matchstart) .
+								\ "^" .
+								\ repeat("~", m.matchlen - 1)
+				else
+					let details = ""
+				endif
 			endif
 		endif
 
 		if g:pinpoint_preview_colour
 			let linenr = i + 2
 			call setbufline(buf, linenr, line)
-			if type(m) isnot v:t_number && m.matchlen > 0
+
+			" get(...'matchlen'...): might be using matchfuzzy()
+			if type(m) isnot v:t_number && get(m, 'matchlen', 0) > 0
 				call matchaddpos('BufEditMatch', [
 				\   [linenr, m.matchstart + 1, m.matchlen]
 				\ ])
