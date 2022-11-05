@@ -7,7 +7,7 @@ let s:current_ent_slashcount = 0
 let s:timer = -1
 let s:showre = 0
 
-function! s:GetRe(pat) abort
+function! s:expand_tilde(pat) abort
 	let pat = a:pat
 
 	if pat[0] ==# '~'
@@ -18,6 +18,12 @@ function! s:GetRe(pat) abort
 			let pat = tolower(pat)
 		endif
 	endif
+
+	return pat
+endfunction
+
+function! s:GetRe(pat) abort
+	let pat = s:expand_tilde(a:pat)
 
 	"let pat = substitute(pat, '.', '*&', 'g')
 	"let pat = glob2regpat("*" . pat . "*")
