@@ -98,8 +98,6 @@ function! s:globpath_for_pattern(pat) abort
 endfunction
 
 function! s:MatchingBufs(pat, list, mode) abort
-	let re = s:GetRe(a:pat)
-
 	if empty(a:list)
 		if a:mode ==# "b"
 			let bufs = getbufinfo({ 'buflisted': 1 })
@@ -130,6 +128,7 @@ function! s:MatchingBufs(pat, list, mode) abort
 		let bufs = a:list
 	endif
 
+	let re = s:GetRe(a:pat)
 	call filter(bufs, function('s:MatchAndTag', [re, a:mode]))
 	call sort(bufs, 's:Cmp')
 
