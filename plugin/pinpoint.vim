@@ -7,6 +7,9 @@ endif
 if !exists('g:pinpoint_preview_fullwords')
 	let g:pinpoint_preview_fullwords = 0
 endif
+if !exists('g:pinpoint_fuzzy')
+	let g:pinpoint_fuzzy = exists("*matchfuzzy")
+endif
 
 let g:pinpoint_cmds = '\C(Buf|F|Old)%(e%[dit]|v%[split]|s%[plit]|t%[abedit])'
 "                       ^~~~~~~~~ capture used

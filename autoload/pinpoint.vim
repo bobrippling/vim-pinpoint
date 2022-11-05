@@ -128,7 +128,7 @@ function! s:MatchingBufs(pat, list, mode) abort
 		let bufs = a:list
 	endif
 
-	if exists("*matchfuzzy")
+	if g:pinpoint_fuzzy
 		let pat = s:expand_tilde(a:pat)
 		let bufs = matchfuzzy(bufs, pat, { 'matchseq': 1, 'key': 'name' })
 	else
@@ -339,7 +339,16 @@ function! s:BufEditPreviewShow(arg_or_timerid) abort
 	let s:current_list = matches
 
 	let buf = winbufnr(s:preview_winid)
-	call setbufline(buf, 1, s:ModeStr(mode) . " preview for '" . arg . "'" . (s:showre ? " /" . s:GetRe(arg) . "/" : ""))
+
+	let desc = s:ModeStr(mode) . " preview for '" . arg . "'"
+	if g:pinpoint_fuzzy
+		let desc .= " (fuzzy)"
+	elseif s:showre
+		let desc .= " /" . s:GetRe(arg) . "/"
+	else
+		let desc .= " (regex)"
+	endif
+	call setbufline(buf, 1, desc)
 
 	let saved_win_id = win_getid()
 	" goto the preview window for matchaddpos()
