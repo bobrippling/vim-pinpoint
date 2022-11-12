@@ -24,7 +24,8 @@ COMMANDS					*pinpoint-commands*
 
 						*:Fedit*
 :Fe[dit] {pattern}	Like |:Bufedit|, but incrementally complete a file path,
-			presenting new files each time a directory (`/`) is entered.
+			presenting new files each time a directory (`/`) is
+			entered.
 
 						*:Fsplit*
 :Fs[plit] {pattern}	Like |:Fedit|, but open the file in a horizontal split.
@@ -49,25 +50,28 @@ COMMANDS					*pinpoint-commands*
 
 SETTINGS					*pinpoint-settings*
 
- *g:pinpoint_preview_delay*	Delay before populating the preview - useful if
-				vim lags on inital character entry
+ *g:pinpoint_preview_delay*	Delay before populating the preview - useful
+				if vim lags on inital character entry
 
- *g:pinpoint_preview_colour*	Display preview in colour, as opposed to underlines
-				showing which parts of the filename match your search.
+ *g:pinpoint_preview_colour*	Display preview in colour, as opposed to
+				underlines showing which parts of the filename
+				match your search.
 
- *g:pinpoint_preview_fullwords*   Rather than matching "abc/xyz" against "*a*b*c*/*x*y*z*",
-				match it against "*abc*/*xyz*"
+ *g:pinpoint_preview_fullwords*   Rather than matching "abc/xyz" against
+				"*a*b*c*/*x*y*z*", match it against
+				"*abc*/*xyz*"
 
- *g:pinpoint_fuzzy*		Use vim/neovim's builtin |matchfuzzy()| function - colour
-				highlighting can't be done in this mode, but it may be
-				more performance than the native vimscript matching.
+ *g:pinpoint_fuzzy*		Use vim/neovim's builtin |matchfuzzy()| function
+				colour highlighting can't be done in this mode,
+				but it may be more performance than the native
+				vimscript matching.
 
 
 MAPS					*pinpoint-maps*
 
 						*c_CTRL-B*
-CTRL-B		Convert a command from |:e|/|:vs|/|:sp|/|:tabe| to the equivalent |:Fedit|,
-		or convert a |:b| to |:Bufedit|
+CTRL-B		Convert a command from |:e|/|:vs|/|:sp|/|:tabe| to the equivalent
+		|:Fedit|, or convert a |:b| to |:Bufedit|
 
 						*CTRL-P*
 CTRL-P		Begin a |:Bufedit| command
