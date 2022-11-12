@@ -455,7 +455,7 @@ function! pinpoint#UpgradeEditCmdline()
 	let pos = getcmdpos() - 1 " 1-index -> 0-index
 	let cmd = cmd[:pos + 1]
 
-	let match = matchlist(cmd, '\v(^|.*\|)(\s*:*\s*)(e%[dit]|vs%[plit]|sp%[lit]|tabe%[dit]|b%[uffer]|sb%[uffer])(\s.*)')
+	let match = matchlist(cmd, '\v(^|.*\|)(\s*:*\s*)(e%[dit]|vs%[plit]|sp%[lit]|tabe%[dit]|b%[uffer]|sb%[uffer]|Buf\S*|F%(e%[dit]|s%[plit]|v%[split]))(\s.*)')
 	if len(match) == 0
 		echo "couldn't match"
 		return ''
@@ -468,6 +468,13 @@ function! pinpoint#UpgradeEditCmdline()
 	elseif edit_cmd[0:1] ==# 'sb'
 		" :sb
 		let replace = 'Bufs'
+	elseif edit_cmd[0] ==# 'F'
+		" :F... -> :Buf... (toggle)
+		let replace = 'Buf' . edit_cmd[1:]
+	elseif edit_cmd[0:2] ==# 'Buf'
+		echom "match:" join(match)
+		" :Buf... -> :F... (toggle)
+		let replace = 'F' . edit_cmd[3:]
 	else
 		" :e/vs/sp/tabe
 		let replace = 'F' . edit_cmd[0]
