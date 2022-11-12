@@ -61,10 +61,9 @@ SETTINGS					*pinpoint-settings*
 				"*a*b*c*/*x*y*z*", match it against
 				"*abc*/*xyz*"
 
- *g:pinpoint_fuzzy*		Use vim/neovim's builtin |matchfuzzy()| function
-				colour highlighting can't be done in this mode,
-				but it may be more performance than the native
-				vimscript matching.
+ *g:pinpoint_fuzzy*		Use vim/neovim's builtin |matchfuzzypos()|
+				function - this may be more performance than
+				the native vimscript matching.
 
 
 MAPS					*pinpoint-maps*

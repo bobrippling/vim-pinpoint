@@ -130,7 +130,13 @@ function! s:MatchingBufs(pat, list, mode) abort
 
 	if g:pinpoint_fuzzy
 		let pat = s:expand_tilde(a:pat)
-		let bufs = matchfuzzy(bufs, pat, { 'matchseq': 1, 'key': 'name' })
+		let [bufs, positions, _scores] = matchfuzzypos(bufs, pat, { 'matchseq': 1, 'key': 'name', 'limit': s:preview_height() })
+
+		for i in range(len(bufs))
+			let start = positions[i][0]
+			let bufs[i].matchstart = start
+			let bufs[i].matchlen = positions[i][-1] - start + 1
+		endfor
 	else
 		let re = s:GetRe(a:pat)
 		call filter(bufs, function('s:MatchAndTag', [re, a:mode]))
