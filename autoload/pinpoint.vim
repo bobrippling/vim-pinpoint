@@ -183,7 +183,6 @@ function! s:MatchAndTag(pat, mode, i, ent) abort
 
 	let a:ent.matchstr = str
 	let a:ent.matchstart = start
-	let a:ent.matchend = end
 	let a:ent.matchlen = end - start
 
 	return 1
