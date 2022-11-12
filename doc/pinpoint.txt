@@ -1,0 +1,85 @@
+*pinpoint.txt*	A file/buffer/oldfile finder
+
+Author:  Rob Pilling <https://github.com/bobrippling>
+License: Same terms as Vim itself.
+
+INTRODUCTION					*pinpoint*
+
+Does your project have enough files to lag ctrlp? Look no further
+
+COMMANDS					*pinpoint-commands*
+
+						*:Bufedit*
+:Bufe[dit] {pattern}	Enter/narrow down a pattern, using the popup window for
+			instant feedback on which buffer will be selected.
+
+						*:Bufsplit*
+:Bufs[plit] {pattern}	Like |:Bufedit|, but open the buffer in a horizontal split.
+
+						*:Bufvsplit*
+:Bufvs[plit] {pattern}	Like |:Bufedit|, but open the buffer in a vertical split.
+
+						*:Buftabedit*
+:Buft[abedit] {pattern} Like |:Bufedit|, but open the buffer in a new tab.
+
+						*:Fedit*
+:Fe[dit] {pattern}	Like |:Bufedit|, but incrementally complete a file path,
+			presenting new files each time a directory (`/`) is entered.
+
+						*:Fsplit*
+:Fs[plit] {pattern}	Like |:Fedit|, but open the file in a horizontal split.
+
+						*:Fvsplit*
+:Fv[split] {pattern}	Like |:Fedit|, but open the file in a vertical split.
+
+						*:Ftabedit*
+:Ft[abedit] {pattern}	Like |:Fedit|, but open the file in a new tab.
+
+						*:Oldedit*
+:Olde[dit] {pattern}	Like |:Bufedit|, but match on `v:oldfiles`.
+
+						*:Oldsplit*
+:Olds[plit] {pattern}	Like |:Oldedit|, but open the oldfile in a horizontal split.
+
+						*:Oldvsplit*
+:Oldv[split] {pattern}	Like |:Oldedit|, but open the oldfile in a vertical split.
+
+						*:Oldtabedit*
+:Oldt[abedit] {pattern} Like |:Oldedit|, but open the oldfile in a new tab.
+
+SETTINGS					*pinpoint-settings*
+
+ *g:pinpoint_preview_delay*	Delay before populating the preview - useful if
+				vim lags on inital character entry
+
+ *g:pinpoint_preview_colour*	Display preview in colour, as opposed to underlines
+				showing which parts of the filename match your search.
+
+ *g:pinpoint_preview_fullwords*   Rather than matching "abc/xyz" against "*a*b*c*/*x*y*z*",
+				match it against "*abc*/*xyz*"
+
+ *g:pinpoint_fuzzy*		Use vim/neovim's builtin |matchfuzzy()| function - colour
+				highlighting can't be done in this mode, but it may be
+				more performance than the native vimscript matching.
+
+
+MAPS					*pinpoint-maps*
+
+						*c_CTRL-B*
+CTRL-B		Convert a command from |:e|/|:vs|/|:sp|/|:tabe| to the equivalent |:Fedit|,
+		or convert a |:b| to |:Bufedit|
+
+						*CTRL-P*
+CTRL-P		Begin a |:Bufedit| command
+
+						*META-P*
+META-P		Begin a |:Fedit| command
+
+
+ABOUT						*pinpoint-about*
+
+Grab the latest version or report a bug on GitHub:
+
+https://github.com/bobrippling/vim-pinpoint
+
+ vim:tw=78:et:ft=help:norl:
