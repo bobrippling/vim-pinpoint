@@ -477,7 +477,6 @@ function! pinpoint#UpgradeEditCmdline()
 		" :F... -> :Buf... (toggle)
 		let replace = 'Buf' . edit_cmd[1:]
 	elseif edit_cmd[0:2] ==# 'Buf'
-		echom "match:" join(match)
 		" :Buf... -> :F... (toggle)
 		let replace = 'F' . edit_cmd[3:]
 	else
