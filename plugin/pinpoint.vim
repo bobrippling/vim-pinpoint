@@ -11,8 +11,8 @@ if !exists('g:pinpoint_fuzzy')
 	let g:pinpoint_fuzzy = exists("*matchfuzzy")
 endif
 
-let g:pinpoint_cmds = '\C(Buf|F|Old)%(e%[dit]|v%[split]|s%[plit]|t%[abedit])'
-"                       ^~~~~~~~~ capture used
+let g:pinpoint_cmds = '\C(P>|%(Buf|F|Old)%(e%[dit]|v%[split]|s%[plit]|t%[abedit]))'
+"                       ^ capture used
 
 command! -bar -nargs=1 -complete=customlist,pinpoint#CompleteOldFiles Oldedit    call pinpoint#Edit(<q-args>, "edit", <q-bang>, <q-mods>, "o")
 command! -bar -nargs=1 -complete=customlist,pinpoint#CompleteOldFiles Oldsplit   call pinpoint#Edit(<q-args>, "split", <q-bang>, <q-mods>, "o")
@@ -40,6 +40,8 @@ if has('nvim')
 else
 	command! -nargs=1 -bang -bar -complete=customlist,pinpoint#CompleteFiles -count=1  -addr=tabs Ftabedit call pinpoint#Edit(<q-args>, <q-count> . "tabedit", <q-bang>, <q-mods>, "f")
 endif
+
+command! -nargs=* -bang -bar -complete=command P call pinpoint#CmdEval(<q-args>, <q-count>, <q-bang>, <q-mods>)
 
 nnoremap <expr> <C-p> ":\<C-U>Bufedit "
 nnoremap <expr> <M-p> ":\<C-U>Fe "

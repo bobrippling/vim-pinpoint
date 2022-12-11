@@ -123,6 +123,8 @@ function! s:MatchingBufs(pat, list, mode) abort
 		elseif a:mode ==# "o"
 			let bufs = v:oldfiles[:]
 			call map(bufs, { i, name -> { "name": name } })
+		elseif a:mode ==# "c"
+			let bufs = s:cmdline_options()
 		endif
 	else
 		let bufs = a:list
@@ -144,6 +146,38 @@ function! s:MatchingBufs(pat, list, mode) abort
 	endif
 
 	return bufs
+endfunction
+
+function! s:cmdline_options()
+	let cmdline = getcmdline()
+	let l:cmdline_terms = split(l:cmdline,'\\\@<!\s\+')
+	if l:cmdline[-1:] == ' '
+		call add(l:cmdline_terms,'')
+	endif
+	"" a string containing all the cmdline terms but the last
+	"let l:cmdline_head = join(l:cmdline_terms[0:-2])
+	"" the last cmdline term as a string
+	"if len(l:cmdline_terms) > 0
+	"	let l:cmdline_tail = l:cmdline_terms[-1]
+	"else
+	"	let l:cmdline_tail = ""
+	"endif
+
+	let fuzzed_cmdline = a:CmdLine . '*'
+
+	let l:d={}
+	execute "silent normal! :" . fuzzed_cmdline . "\<c-a>\<c-\>eextend(l:d, {'cmdline':getcmdline()}) . cmdline\n"
+
+	" If l:d was given the key 'cmdline', that will be the cmdline output
+	" from c_ctrl-a.  If that is the case, strip the non-completion terms.
+	" Otherwise, there was no completion - return an empty list.
+	if has_key(l:d, 'cmdline') && l:d['cmdline'] !~ ''
+		let l:results = split(l:d['cmdline'], '\\\@<!\s\+')[abs(len(l:cmdline_terms)-1):]
+	else
+		let l:results = []
+	endif
+
+	return l:results
 endfunction
 
 "function! s:is_ignored(name) abort
@@ -294,6 +328,8 @@ function! s:ModeStr(mode)
 		return "file"
 	elseif a:mode ==# "o"
 		return "oldfile"
+	elseif a:mode ==# "c"
+		return "cmd"
 	endif
 	return "<unknown mode " .. a:mode .. ">"
 endfunction
@@ -319,7 +355,7 @@ function! s:BufEditPreviewShow(arg_or_timerid) abort
 		return
 	endif
 
-	let mode = cmd[0] ==# "B" ? "b" : cmd[0] ==# "O" ? "o" : "f"
+	let mode = cmd[0] ==# "B" ? "b" : cmd[0] ==# "O" ? "o" : cmd[0] ==# 'F' ? "f" : 'c'
 
 	if !win_id2win(s:preview_winid)
 		call s:BufEditPreviewOpen()
@@ -488,4 +524,10 @@ function! pinpoint#UpgradeEditCmdline()
 	"return "\<C-U>\<C-R>\<C-R>='" . newcmd . "'\<CR>"
 	"                   ^~~~~~ second <C-R> avoids autocmd for each inserted char
 	return "\<C-\>e '" . newcmd . "'\<CR>"
+endfunction
+
+function! pinpoint#CmdEval(args, count, bang, mods)
+	let [first; rest] = split(a:args, '\s')
+	echo "would run:" a:mods . (a:count == -1 ? '' : ' ' . a:count) first a:bang join(rest)
+	"execute
 endfunction
