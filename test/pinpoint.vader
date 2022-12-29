@@ -1,0 +1,24 @@
+Before:
+  !mkdir dir_a dir_b
+  !echo one >dir_a/one
+  !echo two >dir_b/two
+
+# -----------------------
+
+Given:
+  line 1
+
+Do (edit):
+  :e da/o\<C-B>\<CR>
+Expect:
+  one
+
+Do (vsplit):
+  :vs db/o\<C-B>\<CR>:on\<CR>
+Expect:
+  two
+
+#Do (edit with prior commands):
+#  :echo hi | e a/o\<C-B>\<CR>
+#Expect:
+#  one
