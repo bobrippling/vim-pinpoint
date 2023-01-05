@@ -41,8 +41,8 @@ else
 	command! -nargs=1 -bang -bar -complete=customlist,pinpoint#CompleteFiles -count=1  -addr=tabs Ftabedit call pinpoint#Edit(<q-args>, <q-count> . "tabedit", <q-bang>, <q-mods>, "f")
 endif
 
-nnoremap <expr> <C-p> ":\<C-U>Bufedit "
-nnoremap <expr> <M-p> ":\<C-U>Fe "
+nnoremap <expr> <C-p> ":\<C-U>Fe "
+nnoremap <expr> <M-p> ":\<C-U>Bufedit "
 
 cnoremap <expr> <C-B> pinpoint#UpgradeEditCmdline()
 
