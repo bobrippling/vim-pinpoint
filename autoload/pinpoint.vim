@@ -6,6 +6,7 @@ let s:current_ent = ""
 let s:current_ent_slashcount = 0
 let s:timer = -1
 let s:showre = 0
+let s:debug = 0
 
 function! s:expand_tilde(pat) abort
 	let pat = a:pat
@@ -99,6 +100,10 @@ endfunction
 
 function! s:MatchingBufs(pat, list, mode) abort
 	if empty(a:list)
+		if s:debug
+			echom "MatchingBufs(pat=\"" . a:pat . "\", list=[], mode=\"" . a:mode . "\"), starting from scratch"
+		endif
+
 		if a:mode ==# "b"
 			let bufs = getbufinfo({ 'buflisted': 1 })
 		elseif a:mode ==# "f"
@@ -124,8 +129,30 @@ function! s:MatchingBufs(pat, list, mode) abort
 			let bufs = v:oldfiles[:]
 			call map(bufs, { i, name -> { "name": name } })
 		endif
+
+		if s:debug
+			echom "  ... got " . len(bufs) . " entries"
+		endif
 	else
 		let bufs = a:list
+
+		if s:debug
+			echom "MatchingBufs(pat=\"" . a:pat . "\", list=[<" . len(bufs). " entries>], mode=\"" . a:mode . "\"), reusing list"
+		endif
+	endif
+
+	if s:debug
+		for b in bufs[:5]
+			echom "  " . b.name
+		endfor
+		if len(bufs) > 6
+			echom "  ..."
+		endif
+		for b in bufs
+			if b.name =~# '^apps/boot'
+				echom "  " . b.name . " (found)"
+			endif
+		endfor
 	endif
 
 	if g:pinpoint_fuzzy
@@ -328,6 +355,19 @@ function! s:BufEditPreviewShow(arg_or_timerid) abort
 	" Optimisation: since we're not regex, we can detect when the search pattern
 	" has just been added to, and keep narrowing down an existing list, instead
 	" of starting from getbufinfo() each time
+	"
+	" Clear the cache if:
+	" - we've backspaced
+	" - we're not a substring of the cache (???? other way round surely?)
+	" - slashes are relevant (paths) and:
+	"   - mismatch in slash counts
+	"   - we're on fullword matching, just invalidate
+	if s:debug
+		echom "BufEditPreviewShow(" . (type(a:arg_or_timerid) is v:t_number ? "<from timer>" : "\"" . a:arg_or_timerid . "\"" ) . ")"
+		echom "  s:current_ent:" s:current_ent
+		echom "  s:current_ent_slashcount:" s:current_ent_slashcount
+	endif
+
 	if len(arg) < len(s:current_ent)
 	\ || arg[:len(s:current_ent) - 1] !=# s:current_ent
 	\ || (s:slashcount_relevant(mode) && (
