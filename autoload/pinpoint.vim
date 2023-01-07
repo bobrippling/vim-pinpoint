@@ -474,9 +474,6 @@ function! pinpoint#EditPreviewClose() abort
 		let s:timer = -1
 	endif
 
-	let s:current_list = []
-	let s:current_ent_slashcount = -1
-
 	if s:preview_winid is -1
 		return
 	endif
