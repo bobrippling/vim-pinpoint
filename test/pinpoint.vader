@@ -22,3 +22,5 @@ Expect:
 #  :echo hi | e a/o\<C-B>\<CR>
 #Expect:
 #  one
+
+# bot new | sp abc

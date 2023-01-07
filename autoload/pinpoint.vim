@@ -502,7 +502,11 @@ function! pinpoint#UpgradeEditCmdline()
 		return ''
 	endif
 
-	let [pre, edit_cmd, post] = matched
+	let start = matched[:-2]
+	let match_and_post = split(matched[-1], ' ')
+	let edit_cmd = match_and_post[0]
+	let after = join(match_and_post[1:], ' ')
+
 	if edit_cmd[0] ==# 'b'
 		" :b
 		let replace = 'Bufe'
@@ -520,7 +524,17 @@ function! pinpoint#UpgradeEditCmdline()
 		let replace = 'F' . edit_cmd[0]
 	endif
 
-	let newcmd = pre . replace . post
+	"echom "matched" matched
+	"echom "start" start
+	"echom "match_and_post" match_and_post
+	"echom "edit_cmd" edit_cmd
+	"echom "after" after
+
+	"let newcmd = pre . replace . post
+	let newcmd = join(start, '')
+	\ . replace
+	\ . ' '
+	\ . after
 
 	" called from cnorenamp:
 	"return "\<C-U>\<C-R>\<C-R>='" . newcmd . "'\<CR>"
