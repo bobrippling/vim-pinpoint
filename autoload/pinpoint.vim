@@ -99,6 +99,8 @@ function! s:globpath_for_pattern(pat) abort
 endfunction
 
 function! s:MatchingBufs(pat, list, mode) abort
+	" TODO: split pat on whitespace, then filter the list based on each pat
+	" - should be the case for matchfuzzy() already
 	if empty(a:list)
 		if s:debug
 			echom "MatchingBufs(pat=\"" . a:pat . "\", list=[], mode=\"" . a:mode . "\"), starting from scratch"
