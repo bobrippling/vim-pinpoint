@@ -157,7 +157,8 @@ function! s:MatchingBufs(pat, list, mode) abort
 
 	if g:pinpoint_fuzzy
 		let pat = s:expand_tilde(a:pat)
-		let [bufs, positions, _scores] = matchfuzzypos(bufs, pat, { 'matchseq': 1, 'key': 'name', 'limit': s:preview_height() })
+		" don't limit here - will break the cache
+		let [bufs, positions, _scores] = matchfuzzypos(bufs, pat, { 'matchseq': 1, 'key': 'name' })
 
 		for i in range(len(bufs))
 			let start = positions[i][0]
