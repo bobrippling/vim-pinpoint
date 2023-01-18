@@ -450,7 +450,13 @@ function! s:BufEditPreviewShow(arg_or_timerid) abort
 	redraw
 endfunction
 
+function! s:reset_cache() abort
+	let s:current_list = []
+endfunction
+
 function! s:BufEditPreviewOpen() abort
+	call s:reset_cache()
+
 	" affect the 7new below - we don't want an empty NonText line
 	let s:restore_win_layout = winrestcmd()
 
