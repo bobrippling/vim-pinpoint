@@ -41,8 +41,25 @@ else
 	command! -nargs=1 -bang -bar -complete=customlist,pinpoint#CompleteFiles -count=1  -addr=tabs Ftabedit call pinpoint#Edit(<q-args>, <q-count> . "tabedit", <q-bang>, <q-mods>, "f")
 endif
 
-nnoremap <expr> <C-p> ":\<C-U>Fe "
-nnoremap <expr> <M-p> ":\<C-U>Bufedit "
+nnoremap <expr> <C-p> <SID>init(0)
+nnoremap <expr> <M-p> <SID>init(1)
+
+function! s:init(buf)
+	if a:buf
+		let cmd = ":\<C-U>Buf"
+	else
+		let cmd = ":\<C-U>F"
+	endif
+
+	if &modified
+		" split the window if curbuf is +
+		let cmd .= "s"
+	else
+		let cmd .= "e"
+	endif
+
+	return cmd . " "
+endfunction
 
 cnoremap <expr> <C-B> pinpoint#UpgradeEditCmdline()
 
