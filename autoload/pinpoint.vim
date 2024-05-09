@@ -169,11 +169,6 @@ function! s:MatchingBufs(pat, list, mode) abort
 		if len(bufs) > 6
 			echom "  ..."
 		endif
-		for b in bufs
-			if b.name =~# '^apps/boot'
-				echom "  " . b.name . " (found)"
-			endif
-		endfor
 	endif
 
 	if g:pinpoint_fuzzy
