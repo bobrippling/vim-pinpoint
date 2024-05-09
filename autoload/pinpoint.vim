@@ -71,7 +71,7 @@ function! s:slashcount_relevant(mode) abort
 	return stridx("fo", a:mode) >= 0
 endfunction
 
-function! s:globpath_for_pattern(pat) abort
+function! s:globpath_for_pattern(pat, slashdot_means_dotfile) abort
 	let pat = a:pat
 
 	let no_glob_start = stridx("/.", pat[0]) >= 0
@@ -89,8 +89,14 @@ function! s:globpath_for_pattern(pat) abort
 		let globpath = substitute(globpath, '^\*\+', '', '')
 	endif
 
-	" handle dotfiles
-	let globpath = substitute(globpath, '/\*\.', '/.', 'g')
+	if a:slashdot_means_dotfile
+		" handle dotfiles
+		let globpath = substitute(globpath, '/\*\.', '/.', 'g')
+	else
+		" glob() with '/*.' still ignores non-dotfiles with dots in their name,
+		" so we just drop the dot
+		let globpath = substitute(globpath, '/\*\.', '/', 'g')
+	endif
 
 	" handle ~
 	let globpath = substitute(globpath, '\~\*/', '~/', 'g')
@@ -109,14 +115,29 @@ function! s:MatchingBufs(pat, list, mode) abort
 		elseif a:mode ==# "f"
 			" expand() - handle ~, ~luser, %:h/...
 			let expanded_pat = expand(a:pat)
-			let bufs = glob(s:globpath_for_pattern(expanded_pat), 0, 1)
+			let slashdot_means_dotfile = 1 " `:Fe a/.b` means the dotfiles in `a/`
 
-			let make_uniq = 0
-			if s:ignore_case() ? expanded_pat !=? a:pat : expanded_pat !=# a:pat
-				" include buffers stored without '~' expansion
-				call extend(bufs, glob(s:globpath_for_pattern(a:pat), 0, 1))
-				let make_uniq = 1
-			endif
+			while 1
+				let glob = s:globpath_for_pattern(expanded_pat, slashdot_means_dotfile)
+				let bufs = glob(glob, 0, 1)
+
+				if s:debug
+					echom "  globpath_for_pattern: " . glob . ", gave " . len(bufs) . " bufs"
+				endif
+
+				let make_uniq = 0
+				if s:ignore_case() ? expanded_pat !=? a:pat : expanded_pat !=# a:pat
+					" include buffers stored without '~' expansion
+					call extend(bufs, glob(s:globpath_for_pattern(a:pat, slashdot_means_dotfile), 0, 1))
+					let make_uniq = 1
+				endif
+
+				if len(bufs) > 0 || slashdot_means_dotfile == 0
+					break
+				endif
+				" retry with looser dotfile handling
+				let slashdot_means_dotfile = 0
+			endwhile
 
 			call sort(bufs)
 			if make_uniq
@@ -157,13 +178,18 @@ function! s:MatchingBufs(pat, list, mode) abort
 
 	if g:pinpoint_fuzzy
 		let pat = s:expand_tilde(a:pat)
+		let pat = substitute(pat, '/\.', '/', 'g') " similar bug to glob()
+
 		" don't limit here - will break the cache
 		let [bufs, positions, _scores] = matchfuzzypos(bufs, pat, { 'matchseq': 1, 'key': 'name' })
+
+		if s:debug | echom "matchfuzzypos(..., pat=" . pat . ", ...) narrowed down to " . len(bufs) . " bufs:" | endif
 
 		for i in range(len(bufs))
 			let start = positions[i][0]
 			let bufs[i].matchstart = start
 			let bufs[i].matchlen = positions[i][-1] - start + 1
+			if s:debug | echom "  " . bufs[i].name | endif
 		endfor
 	else
 		let re = s:GetRe(a:pat)
