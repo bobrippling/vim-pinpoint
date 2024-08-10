@@ -117,6 +117,10 @@ function! s:MatchingBufs(pat, list, mode) abort
 			let expanded_pat = expand(a:pat)
 			let slashdot_means_dotfile = 1 " `:Fe a/.b` means the dotfiles in `a/`
 
+			if s:debug
+				echom "  file mode, expanded_pat:" expanded_pat
+			endif
+
 			while 1
 				let glob = s:globpath_for_pattern(expanded_pat, slashdot_means_dotfile)
 				let bufs = glob(glob, 0, 1)
@@ -178,7 +182,7 @@ function! s:MatchingBufs(pat, list, mode) abort
 		" don't limit here - will break the cache
 		let [bufs, positions, _scores] = matchfuzzypos(bufs, pat, { 'matchseq': 1, 'key': 'name' })
 
-		if s:debug | echom "matchfuzzypos(..., pat=" . pat . ", ...) narrowed down to " . len(bufs) . " bufs:" | endif
+		if s:debug | echom "  matchfuzzypos(..., pat=" . pat . ", ...) narrowed down to " . len(bufs) . " bufs:" | endif
 
 		for i in range(len(bufs))
 			let start = positions[i][0]
