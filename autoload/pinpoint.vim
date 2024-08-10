@@ -113,8 +113,8 @@ function! s:MatchingBufs(pat, list, mode) abort
 		if a:mode ==# "b"
 			let bufs = getbufinfo({ 'buflisted': 1 })
 		elseif a:mode ==# "f"
-			" expand() - handle ~, ~luser, %:h/...
-			let expanded_pat = expand(a:pat)
+			" expand_tilde() - handle ~, ~luser, %:h/...
+			let expanded_pat = s:expand_tilde(a:pat)
 			let slashdot_means_dotfile = 1 " `:Fe a/.b` means the dotfiles in `a/`
 
 			if s:debug
