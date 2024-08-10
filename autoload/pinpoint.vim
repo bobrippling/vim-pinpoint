@@ -11,10 +11,14 @@ let s:debug = 0
 function! s:expand_tilde(pat) abort
 	let pat = a:pat
 
-	if pat[0] ==# '~'
+	if pat[0] ==# '~' || pat[0] ==# '%'
 		" match s:MatchingBufs and always expand ~
 		let make_lower = s:ignore_case() && !s:ismixedcase(pat)
-		let pat = expand(pat)
+
+		" expandcmd() will include the trailing string
+		" i.e. expand("%:h/abc") ==# expand("%:h")
+		let pat = expandcmd(pat)
+
 		if make_lower
 			let pat = tolower(pat)
 		endif
