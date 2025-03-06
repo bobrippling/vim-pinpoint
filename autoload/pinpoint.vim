@@ -527,14 +527,11 @@ function! pinpoint#EditPreviewClose() abort
 	nohlsearch
 endfunction
 
-function! pinpoint#UpgradeEditCmdline()
+function! pinpoint#UpgradeEditCmdline(cmdline, off)
 	" note: any text after cmdline[getcmdpos()] gets dropped
-	let cmd = getcmdline()
-
-	let matched = cmdline#split('(e%[dit]|vs%[plit]|sp%[lit]|tabe%[dit]|b%[uffer]|sb%[uffer]|%(Buf|F)%(e%[dit]|s%[plit]|v%[split]|t%[abedit]))>')
+	let matched = cmdline#split('(e%[dit]|vs%[plit]|sp%[lit]|tabe%[dit]|b%[uffer]|sb%[uffer]|%(Buf|F)%(e%[dit]|s%[plit]|v%[split]|t%[abedit]))>', a:cmdline)
 	if empty(matched)
-		echo "couldn't match"
-		return ''
+		return 0
 	endif
 
 	let start = matched[:-2]
@@ -564,7 +561,7 @@ function! pinpoint#UpgradeEditCmdline()
 	\ . ' '
 	\ . after
 
-	let leading_space = substitute(getcmdline(), '\S.*', '', '')
+	let leading_space = substitute(a:cmdline, '\S.*', '', '')
 
 	" called from cnorenamp
 	" second <C-R> avoids autocmd for each inserted char
