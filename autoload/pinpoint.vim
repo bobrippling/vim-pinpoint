@@ -564,8 +564,9 @@ function! pinpoint#UpgradeEditCmdline()
 	\ . ' '
 	\ . after
 
-	" called from cnorenamp:
-	"return "\<C-U>\<C-R>\<C-R>='" . newcmd . "'\<CR>"
-	"                   ^~~~~~ second <C-R> avoids autocmd for each inserted char
-	return "\<C-\>e '" . newcmd . "'\<CR>"
+	let leading_space = substitute(getcmdline(), '\S.*', '', '')
+
+	" called from cnorenamp
+	" second <C-R> avoids autocmd for each inserted char
+	return repeat("\<BS>", len(a:cmdline)) . "\<C-R>\<C-R>='" . escape(leading_space . newcmd, "'") . "'\<CR>"
 endfunction
