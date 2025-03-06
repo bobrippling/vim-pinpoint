@@ -531,7 +531,7 @@ function! pinpoint#UpgradeEditCmdline()
 	" note: any text after cmdline[getcmdpos()] gets dropped
 	let cmd = getcmdline()
 
-	let matched = cmdline#split('(e%[dit]|vs%[plit]|sp%[lit]|tabe%[dit]|b%[uffer]|sb%[uffer]|Buf\S*|F%(e%[dit]|s%[plit]|v%[split]))')
+	let matched = cmdline#split('(e%[dit]|vs%[plit]|sp%[lit]|tabe%[dit]|b%[uffer]|sb%[uffer]|%(Buf|F)%(e%[dit]|s%[plit]|v%[split]|t%[abedit]))>')
 	if empty(matched)
 		echo "couldn't match"
 		return ''
