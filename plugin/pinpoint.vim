@@ -61,7 +61,7 @@ function! s:init(buf)
 	return cmd . " "
 endfunction
 
-cnoremap <expr> <C-B> pinpoint#UpgradeEditCmdline()
+cnoremap <expr> <Plug>(pinpoint-upgradecmdline) pinpoint#UpgradeEditCmdlineExpr()
 
 augroup BufEdit
 	autocmd!

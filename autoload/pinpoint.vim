@@ -567,3 +567,8 @@ function! pinpoint#UpgradeEditCmdline(cmdline, off)
 	" second <C-R> avoids autocmd for each inserted char
 	return repeat("\<BS>", len(a:cmdline)) . "\<C-R>\<C-R>='" . escape(leading_space . newcmd, "'") . "'\<CR>"
 endfunction
+
+function! pinpoint#UpgradeEditCmdlineExpr()
+	let r = pinpoint#UpgradeEditCmdline(getcmdline(), 0)
+	return r is 0 ? '' : r
+endfunction
