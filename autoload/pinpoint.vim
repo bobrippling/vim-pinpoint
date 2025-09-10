@@ -255,13 +255,13 @@ function! s:Cmp(a, b) abort
 	let a = a:a
 	let b = a:b
 
+	" no need to downrank for &wildignore - already handled via `glob()`
+
 	let diff = a.matchlen - b.matchlen
 	if diff | return diff | endif
 
 	let diff = len(a.matchstr) - len(b.matchstr)
 	if diff | return diff | endif
-
-	" could use &wildignore here to compare
 
 	return len(a.name) - len(b.name)
 endfunction
