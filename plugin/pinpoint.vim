@@ -72,4 +72,4 @@ augroup BufEdit
 	autocmd CmdlineLeave * call pinpoint#EditPreviewClose()
 augroup END
 
-highlight BufEditMatch ctermfg=blue
+highlight BufEditMatch ctermfg=blue guifg=blue
