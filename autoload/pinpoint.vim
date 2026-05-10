@@ -75,7 +75,45 @@ function! s:slashcount_relevant(mode) abort
 	return stridx("fo", a:mode) >= 0
 endfunction
 
-function! s:globpath_for_pattern(pat, slashdot_means_dotfile) abort
+function! s:parse_mode_hints(pat) abort
+	" look for mode hints in a:pat:
+	" /^\*/ -> search at any directory depth
+	" /:[vst]$/ -> :vsplit, :split or :tabedit the file
+	let pat = a:pat
+	let any_depth = 0
+	let split_cmd = ''
+
+	if !empty(pat) && pat[0] ==# '*'
+		let any_depth = 1
+		let pat = pat[1:]
+	endif
+
+	let m = matchlist(pat, ':\([vst]\)$')
+	if !empty(m)
+		let split_cmd = m[1]
+		let pat = pat[:-3]
+	endif
+
+	return [pat, any_depth, split_cmd]
+endfunction
+
+function! s:apply_modehint(editcmd, splitmode, pinpointmode) abort
+	if empty(a:splitmode)
+		return a:editcmd
+	endif
+
+	if a:pinpointmode ==# 'b'
+		if a:splitmode ==# 'v' | return 'vert sb' | endif
+		if a:splitmode ==# 's' | return 'sb' | endif
+		return 'tab sb'
+	endif
+
+	if a:splitmode ==# 'v' | return 'vs' | endif
+	if a:splitmode ==# 's' | return 'sp' | endif
+	return 'tabe'
+endfunction
+
+function! s:globpath_for_pattern(pat, slashdot_means_dotfile, any_depth) abort
 	let pat = a:pat
 
 	let no_glob_start = stridx("/.", pat[0]) >= 0
@@ -105,13 +143,18 @@ function! s:globpath_for_pattern(pat, slashdot_means_dotfile) abort
 	" handle ~
 	let globpath = substitute(globpath, '\~\*/', '~/', 'g')
 
+	if a:any_depth
+		" glob() only deals with **/, not **3/
+		let globpath = '**/' . globpath
+	endif
+
 	return globpath
 endfunction
 
-function! s:MatchingBufs(pat, list, mode) abort
+function! s:MatchingBufs(pat, any_depth, list, mode) abort
 	if empty(a:list)
 		if s:debug
-			echom "MatchingBufs(pat=\"" . a:pat . "\", list=[], mode=\"" . a:mode . "\"), starting from scratch"
+			echom "MatchingBufs(pat=\"" . pat . "\", any_depth=" . a:any_depth . ", list=[], mode=\"" . a:mode . "\"), starting from scratch"
 		endif
 
 		if a:mode ==# "b"
@@ -126,7 +169,7 @@ function! s:MatchingBufs(pat, list, mode) abort
 			endif
 
 			while 1
-				let glob = s:globpath_for_pattern(expanded_pat, slashdot_means_dotfile)
+				let glob = s:globpath_for_pattern(expanded_pat, slashdot_means_dotfile, a:any_depth)
 				let bufs = glob(glob, 0, 1)
 
 				if s:debug
@@ -136,7 +179,7 @@ function! s:MatchingBufs(pat, list, mode) abort
 				let make_uniq = 0
 				if s:ignore_case() ? expanded_pat !=? a:pat : expanded_pat !=# a:pat
 					" include buffers stored without '~' expansion
-					call extend(bufs, glob(s:globpath_for_pattern(a:pat, slashdot_means_dotfile), 0, 1))
+					call extend(bufs, glob(s:globpath_for_pattern(a:pat, slashdot_means_dotfile, a:any_depth), 0, 1))
 					let make_uniq = 1
 				endif
 
@@ -166,7 +209,7 @@ function! s:MatchingBufs(pat, list, mode) abort
 		let bufs = a:list
 
 		if s:debug
-			echom "MatchingBufs(pat=\"" . a:pat . "\", list=[<" . len(bufs). " entries>], mode=\"" . a:mode . "\"), reusing list"
+			echom "MatchingBufs(pat=\"" . a:pat . "\", any_depth=" . a:any_depth . ", list=[<" . len(bufs). " entries>], mode=\"" . a:mode . "\"), reusing list"
 		endif
 	endif
 
@@ -267,19 +310,21 @@ function! s:Cmp(a, b) abort
 endfunction
 
 function! pinpoint#CompleteBufs(ArgLead, CmdLine, CursorPos) abort
-	let bufs = s:MatchingBufs(a:ArgLead, [], "b")
+	let [pat, any_depth, _split_cmd] = s:parse_mode_hints(a:ArgLead)
+
+	let bufs = s:MatchingBufs(pat, any_depth, [], "b")
 	call map(bufs, { i, ent -> ent.name })
 	return bufs
 endfunction
 
 function! pinpoint#CompleteFiles(ArgLead, CmdLine, CursorPos) abort
-	let bufs = s:MatchingBufs(a:ArgLead, [], "f")
+	let bufs = s:MatchingBufs(pat, any_depth, [], "f")
 	call map(bufs, { i, ent -> ent.name })
 	return bufs
 endfunction
 
 function! pinpoint#CompleteOldFiles(ArgLead, CmdLine, CursorPos) abort
-	let bufs = s:MatchingBufs(a:ArgLead, [], "o")
+	let bufs = s:MatchingBufs(pat, any_depth, [], "o")
 	call map(bufs, { i, ent -> ent.name })
 	return bufs
 endfunction
@@ -287,8 +332,10 @@ endfunction
 " the command given to BufEdit must accept "!" appendin to it
 function! pinpoint#Edit(glob, editcmd, bangstr, mods, mode) abort
 	let glob = a:glob
+	let [pat, any_depth, split_cmd] = s:parse_mode_hints(glob)
+	let editcmd = s:apply_modehint(a:editcmd, split_cmd, a:mode)
 
-	let ents = s:MatchingBufs(glob, [], a:mode)
+	let ents = s:MatchingBufs(pat, any_depth, [], a:mode)
 	if len(ents) < 1
 		echoerr "No matches for" glob
 		return
@@ -305,7 +352,7 @@ function! pinpoint#Edit(glob, editcmd, bangstr, mods, mode) abort
 		echoerr "Invalid mode" a:mode
 	endif
 
-	execute a:mods a:editcmd a:bangstr path
+	execute a:mods editcmd a:bangstr path
 endfunction
 
 function! pinpoint#EditPreview() abort
@@ -409,21 +456,23 @@ function! s:BufEditPreviewShow(arg_or_timerid) abort
 		let s:current_list = []
 		let s:current_ent_slashcount = s:slashcount(arg)
 	endif
-	let matches = s:MatchingBufs(arg, s:current_list, mode)
+	let [pat, any_depth, split_cmd] = s:parse_mode_hints(arg)
+	let matches = s:MatchingBufs(pat, any_depth, s:current_list, mode)
 	let s:current_ent = arg
 	let s:current_list = matches
 
 	let buf = winbufnr(s:preview_winid)
-
-	let desc = s:ModeStr(mode) . " preview for '" . arg . "'"
+	let desc = s:ModeStr(mode) . " preview for '" . pat . "'"
+	let modes = []
+	if any_depth | let modes += ["**/"] | endif
 	if g:pinpoint_fuzzy
-		let desc .= " (fuzzy)"
+		let modes += ["fuzzy"]
 	elseif s:showre
-		let desc .= " /" . s:GetRe(arg) . "/"
+		let modes += ["/" . s:GetRe(arg) . "/"]
 	else
-		let desc .= " (regex)"
+		let modes += ["regex"]
 	endif
-	call setbufline(buf, 1, desc)
+	call setbufline(buf, 1, desc . (empty(modes) ? '' : ' (' . join(modes, ", ") . ')'))
 
 	let saved_win_id = win_getid()
 	" goto the preview window for matchaddpos()
