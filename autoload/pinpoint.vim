@@ -208,23 +208,8 @@ function! s:MatchingBufs(pat, list, mode) abort
 endfunction
 
 function! s:is_ignored(f) abort
-	for ign in s:ignores
-		let dir_only = ign[-1:] ==# '/'
-		let pat = dir_only ? ign[:-2] : ign
-		let anchored = stridx(pat, '/') >= 0
-
-		let re = escape(pat, '\.^$~')
-		let re = substitute(re, '\*\*', '.*', 'g')
-		let re = substitute(re, '\*', '[^/]*', 'g')
-		let re = substitute(re, '?', '[^/]', 'g')
-
-		if anchored
-			let matched = a:f =~# '^\%(\./\)\?' . re . '\($\|/\)'
-		else
-			let matched = a:f =~# '\%(^\|/\)' . re . '\($\|/\)'
-		endif
-
-		if matched
+	for re in s:ignores
+		if a:f =~# re
 			return 0
 		endif
 	endfor
@@ -242,7 +227,20 @@ function! s:populate_ignores() abort
 		let l = substitute(l, '#.*', '', '')
 		if empty(l) | continue | endif
 
-		call add(s:ignores, l)
+		let dir_only = l[-1:] ==# '/'
+		let pat = dir_only ? l[:-2] : l
+		let anchored = stridx(pat, '/') >= 0
+
+		let re = escape(pat, '\.^$~')
+		let re = substitute(re, '\*\*', '.*', 'g')
+		let re = substitute(re, '\*', '[^/]*', 'g')
+		let re = substitute(re, '?', '[^/]', 'g')
+
+		let re = anchored
+				\ ? '^\%(\./\)\?' . re . '\($\|/\)'
+				\ : '\%(^\|/\)' . re . '\($\|/\)'
+
+		call add(s:ignores, re)
 	endfor
 endfunction
 
