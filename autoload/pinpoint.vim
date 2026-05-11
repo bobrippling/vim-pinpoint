@@ -7,6 +7,7 @@ let s:current_ent_slashcount = 0
 let s:timer = -1
 let s:showre = 0
 let s:debug = 0
+let s:ignores = 0
 
 function! s:expand_tilde(pat) abort
 	let pat = a:pat
@@ -125,9 +126,13 @@ function! s:MatchingBufs(pat, list, mode) abort
 				echom "  file mode, expanded_pat:" expanded_pat
 			endif
 
+			if s:ignores is 0
+				call s:populate_ignores()
+			endif
+
 			while 1
 				let glob = s:globpath_for_pattern(expanded_pat, slashdot_means_dotfile)
-				let bufs = glob(glob, 0, 1)
+				let bufs = filter(glob(glob, 0, 1), 's:is_ignored(v:val)')
 
 				if s:debug
 					echom "  globpath_for_pattern: " . glob . ", gave " . len(bufs) . " bufs"
@@ -153,7 +158,6 @@ function! s:MatchingBufs(pat, list, mode) abort
 			endif
 
 			call map(bufs, { i, name -> { "name": name } })
-			"call filter(bufs, { i, name -> s:is_ignored(name) })
 		elseif a:mode ==# "o"
 			let bufs = v:oldfiles[:]
 			call map(bufs, { i, name -> { "name": name } })
@@ -203,9 +207,44 @@ function! s:MatchingBufs(pat, list, mode) abort
 	return bufs
 endfunction
 
-"function! s:is_ignored(name) abort
-"	return 0
-"endfunction
+function! s:is_ignored(f) abort
+	for ign in s:ignores
+		let dir_only = ign[-1:] ==# '/'
+		let pat = dir_only ? ign[:-2] : ign
+		let anchored = stridx(pat, '/') >= 0
+
+		let re = escape(pat, '\.^$~')
+		let re = substitute(re, '\*\*', '.*', 'g')
+		let re = substitute(re, '\*', '[^/]*', 'g')
+		let re = substitute(re, '?', '[^/]', 'g')
+
+		if anchored
+			let matched = a:f =~# '^\%(\./\)\?' . re . '\($\|/\)'
+		else
+			let matched = a:f =~# '\%(^\|/\)' . re . '\($\|/\)'
+		endif
+
+		if matched
+			return 0
+		endif
+	endfor
+	return 1
+endfunction
+
+function! s:populate_ignores() abort
+	let s:ignores = []
+	try
+		let lines = readfile('.gitignore')
+	catch /E484/
+		return
+	endtry
+	for l in lines
+		let l = substitute(l, '#.*', '', '')
+		if empty(l) | continue | endif
+
+		call add(s:ignores, l)
+	endfor
+endfunction
 
 function! s:MatchAndTag(pat, mode, i, ent) abort
 	let name = a:ent.name
