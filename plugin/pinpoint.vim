@@ -41,6 +41,8 @@ else
 	command! -nargs=1 -bang -bar -complete=customlist,pinpoint#CompleteFiles -count=1  -addr=tabs Ftabedit call pinpoint#Edit(<q-args>, <q-count> . "tabedit", <q-bang>, <q-mods>, "f")
 endif
 
+command! -bar PinpointReset call pinpoint#reset()
+
 nnoremap <expr> <C-p> <SID>init(0)
 nnoremap <expr> <M-p> <SID>init(1)
 

@@ -609,3 +609,7 @@ function! pinpoint#UpgradeEditCmdlineExpr()
 	let r = pinpoint#UpgradeEditCmdline(getcmdline(), 0)
 	return r is 0 ? '' : r
 endfunction
+
+function! pinpoint#reset()
+	let s:ignores = 0
+endfunction
