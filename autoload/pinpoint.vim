@@ -1,5 +1,5 @@
 let s:preview_winid = -1
-let s:saved_laststatus = &laststatus
+let s:saved_laststatus = -1
 let s:restore_win_layout = ''
 let s:current_list = []
 let s:current_ent = ""
@@ -605,12 +605,12 @@ function! s:BufEditPreviewOpen() abort
 
 		execute 'botright' s:preview_height() 'new'
 		let s:preview_winid = win_getid()
+
+		let s:saved_laststatus = &laststatus
+		set laststatus=0
 	endif
 
 	setlocal modifiable noreadonly winfixheight buftype=nofile bufhidden=wipe
-
-	let s:saved_laststatus = &laststatus
-	set laststatus=0
 
 	wincmd p
 endfunction
@@ -637,7 +637,9 @@ function! pinpoint#EditPreviewClose() abort
 	endif
 
 	execute win "q"
-	let &laststatus = s:saved_laststatus
+	if s:saved_laststatus isnot -1
+		let &laststatus = s:saved_laststatus
+	endif
 	execute s:restore_win_layout
 	redraw
 	nohlsearch
