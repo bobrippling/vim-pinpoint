@@ -572,11 +572,41 @@ endfunction
 function! s:BufEditPreviewOpen() abort
 	call s:reset_cache()
 
-	" affect the 7new below - we don't want an empty NonText line
-	let s:restore_win_layout = winrestcmd()
+	if has('nvim')
+		let override = get(g:, 'pinpoint_preview_float', '')
 
-	execute 'botright' s:preview_height() 'new'
-	let s:preview_winid = win_getid()
+		if override isnot ''
+			let float = override
+		else
+			let float = 1
+		endif
+	endif
+
+	if float
+		let s:restore_win_layout = ''
+
+		let b = nvim_create_buf(0, 1)
+		let s:preview_winid = nvim_open_win(b, 1, #{
+			\ relative: 'laststatus',
+			\ row: 0,
+			\ col: 0,
+			\ width: &columns,
+			\ height: s:preview_height(),
+			\ border: 'single',
+		\ })
+		" focusable: 0, - need focus for highlighting, etc
+
+		if s:preview_winid == 0
+			return " error
+		endif
+	else
+		" affect the 7new below - we don't want an empty NonText line
+		let s:restore_win_layout = winrestcmd()
+
+		execute 'botright' s:preview_height() 'new'
+		let s:preview_winid = win_getid()
+	endif
+
 	setlocal modifiable noreadonly winfixheight buftype=nofile bufhidden=wipe
 
 	let s:saved_laststatus = &laststatus

@@ -65,6 +65,7 @@ SETTINGS					*pinpoint-settings*
 				function - this may be more performance than
 				the native vimscript matching.
 
+ *g:pinpoint_preview_float*		Use a neovim floating window for the preview
 
 MAPS					*pinpoint-maps*
 
