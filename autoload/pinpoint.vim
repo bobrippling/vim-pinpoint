@@ -586,12 +586,13 @@ function! s:BufEditPreviewOpen() abort
 		let s:restore_win_layout = ''
 
 		let b = nvim_create_buf(0, 1)
+		let ph = s:preview_height()
 		let s:preview_winid = nvim_open_win(b, 1, #{
 			\ relative: 'laststatus',
-			\ row: 0,
+			\ row: -ph - 4,
 			\ col: 0,
 			\ width: &columns,
-			\ height: s:preview_height(),
+			\ height: ph,
 			\ border: 'single',
 		\ })
 		" focusable: 0, - need focus for highlighting, etc
