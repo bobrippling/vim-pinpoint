@@ -713,10 +713,26 @@ function! pinpoint#CompleteInsert(findstart, base) abort
 		let [pat, any_depth, _] = s:parse_mode_hints(a:base)
 		let ents = s:MatchingBufs(pat, any_depth, [], 'f')
 
+		let tilde = a:base[:1] ==# '~/'
+		if tilde
+			let home = expand('~/')
+			for e in ents
+				if e.name[:len(home) - 1] ==# home
+					let e.display = '~/' . e.name[len(home):]
+				else
+					let e.display = e.name
+				endif
+			endfor
+		else
+			for e in ents
+				let e.display = e.name
+			endfor
+		endif
+
 		return map(ents, { _, e ->
 		\   isdirectory(e.name)
-		\   ? { "word": e.name . "/", "kind": "d", "icase": 1 }
-		\   : { "word": e.name . "",  "kind": "f", "icase": 1 }
+		\   ? { "word": e.display . "/", "abbr": e.display, "kind": "d", "icase": 1 }
+		\   : { "word": e.display . "",  "abbr": e.display, "kind": "f", "icase": 1 }
 		\ })
 	endif
 endfunction
