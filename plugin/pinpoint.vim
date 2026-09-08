@@ -65,6 +65,9 @@ endfunction
 
 cnoremap <expr> <Plug>(pinpoint-upgradecmdline) pinpoint#UpgradeEditCmdlineExpr()
 
+imap <C-X>f <Plug>(pinpoint-complete-files)
+inoremap <expr> <Plug>(pinpoint-complete-files) pinpoint#InsertCompleteExpr()
+
 augroup BufEdit
 	autocmd!
 

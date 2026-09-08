@@ -695,3 +695,43 @@ endfunction
 function! pinpoint#reset()
 	let s:ignores = 0
 endfunction
+
+function! pinpoint#CompleteInsert(findstart, base) abort
+	if a:findstart
+		let col  = col('.') - 1
+		let line = getline('.')
+		if col > len(line) - 1
+			let col = len(line) - 1
+		endif
+
+		while col > 0 && line[col - 1] !~# '\s'
+			let col -= 1
+		endwhile
+
+		return col
+	else
+		let [pat, any_depth, _] = s:parse_mode_hints(a:base)
+		let ents = s:MatchingBufs(pat, any_depth, [], 'f')
+
+		return map(ents, { _, e ->
+		\   isdirectory(e.name)
+		\   ? { "word": e.name . "/", "kind": "d", "icase": 1 }
+		\   : { "word": e.name . "",  "kind": "f", "icase": 1 }
+		\ })
+	endif
+endfunction
+
+function! pinpoint#InsertCompleteExpr() abort
+	let b:pinpoint_saved_completefunc = &l:completefunc
+	setlocal completefunc=pinpoint#CompleteInsert
+
+	augroup pinpoint_restore_completefunc
+		autocmd!
+		autocmd CompleteDone <buffer> ++once
+			\ let &l:completefunc = get(b:, 'pinpoint_saved_completefunc', '')
+			\| unlet! b:pinpoint_saved_completefunc
+			\| autocmd! pinpoint_restore_completefunc
+	augroup END
+
+	return "\<C-X>\<C-U>"
+endfunction
