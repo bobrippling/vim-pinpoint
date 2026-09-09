@@ -704,7 +704,8 @@ function! pinpoint#CompleteInsert(findstart, base) abort
 			let col = len(line)
 		endif
 
-		while col > 0 && line[col - 1] !~# '\s'
+		" \f: 'isfname'
+		while col > 0 && line[col - 1] =~# '\f'
 			let col -= 1
 		endwhile
 
