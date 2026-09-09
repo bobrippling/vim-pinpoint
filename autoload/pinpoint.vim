@@ -700,8 +700,8 @@ function! pinpoint#CompleteInsert(findstart, base) abort
 	if a:findstart
 		let col  = col('.') - 1
 		let line = getline('.')
-		if col > len(line) - 1
-			let col = len(line) - 1
+		if col > len(line)
+			let col = len(line)
 		endif
 
 		while col > 0 && line[col - 1] !~# '\s'
