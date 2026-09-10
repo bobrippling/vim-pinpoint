@@ -155,7 +155,7 @@ endfunction
 function! s:MatchingBufs(pat, any_depth, list, mode) abort
 	if empty(a:list)
 		if s:debug
-			echom "MatchingBufs(pat=\"" . pat . "\", any_depth=" . a:any_depth . ", list=[], mode=\"" . a:mode . "\"), starting from scratch"
+			echom "MatchingBufs(pat=\"" . a:pat . "\", any_depth=" . a:any_depth . ", list=[], mode=\"" . a:mode . "\"), starting from scratch"
 		endif
 
 		if a:mode ==# "b"
@@ -355,12 +355,16 @@ function! pinpoint#CompleteBufs(ArgLead, CmdLine, CursorPos) abort
 endfunction
 
 function! pinpoint#CompleteFiles(ArgLead, CmdLine, CursorPos) abort
+	let [pat, any_depth, _split_cmd] = s:parse_mode_hints(a:ArgLead)
+
 	let bufs = s:MatchingBufs(pat, any_depth, [], "f")
 	call map(bufs, { i, ent -> ent.name })
 	return bufs
 endfunction
 
 function! pinpoint#CompleteOldFiles(ArgLead, CmdLine, CursorPos) abort
+	let [pat, any_depth, _split_cmd] = s:parse_mode_hints(a:ArgLead)
+
 	let bufs = s:MatchingBufs(pat, any_depth, [], "o")
 	call map(bufs, { i, ent -> ent.name })
 	return bufs
