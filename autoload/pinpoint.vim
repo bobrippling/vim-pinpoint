@@ -584,6 +584,8 @@ function! s:BufEditPreviewOpen() abort
 		else
 			let float = 1
 		endif
+	else
+		let float = 0
 	endif
 
 	if float
