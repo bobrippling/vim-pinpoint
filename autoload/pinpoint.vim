@@ -466,8 +466,8 @@ function! s:BufEditPreviewShow(arg_or_timerid) abort
 
 	let mode = cmd[0] ==# "B" ? "b" : cmd[0] ==# "O" ? "o" : "f"
 
-	if !win_id2win(s:preview_winid)
-		call s:BufEditPreviewOpen()
+	if !win_id2win(s:preview_winid) && !s:BufEditPreviewOpen()
+		return
 	endif
 
 	" Optimisation: since we're not regex, we can detect when the search pattern
@@ -604,7 +604,7 @@ function! s:BufEditPreviewOpen() abort
 		" focusable: 0, - need focus for highlighting, etc
 
 		if win_id == 0
-			return " error
+			return 0 " error
 		endif
 		let s:preview_winid = win_id
 	else
@@ -621,6 +621,7 @@ function! s:BufEditPreviewOpen() abort
 	setlocal modifiable noreadonly winfixheight buftype=nofile bufhidden=wipe
 
 	wincmd p
+	return 1
 endfunction
 
 function! s:preview_height() abort
