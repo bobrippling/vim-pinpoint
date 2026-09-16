@@ -593,7 +593,7 @@ function! s:BufEditPreviewOpen() abort
 
 		let b = nvim_create_buf(0, 1)
 		let ph = s:preview_height()
-		let s:preview_winid = nvim_open_win(b, 1, #{
+		let win_id = nvim_open_win(b, 1, #{
 			\ relative: 'laststatus',
 			\ row: -ph - 4,
 			\ col: 0,
@@ -603,9 +603,10 @@ function! s:BufEditPreviewOpen() abort
 		\ })
 		" focusable: 0, - need focus for highlighting, etc
 
-		if s:preview_winid == 0
+		if win_id == 0
 			return " error
 		endif
+		let s:preview_winid = win_id
 	else
 		" affect the 7new below - we don't want an empty NonText line
 		let s:restore_win_layout = winrestcmd()
